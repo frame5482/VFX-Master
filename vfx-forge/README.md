@@ -11,6 +11,15 @@
 - บันทึกอัตโนมัติใน localStorage นำเข้า/ส่งออก JSON โปรเจกต์ พร้อมตรวจค่าก่อนนำเข้า
 - Ctrl+S ส่งออกโปรเจกต์, Space เล่น/หยุด, Ctrl+Z และ Ctrl+Shift+Z ย้อนกลับ/ทำซ้ำ
 
+## โหมด 2D / 3D
+
+เลือกปุ่ม **2D / 3D** เหนือพรีวิว โปรเจกต์ใหม่เริ่มใน 3D ส่วน JSON เก่าที่ไม่มี mode จะเปิดใน 2D เพื่อรักษารูปแบบเดิม ปุ่มรีเซ็ตมุมมองคืนกล้องเริ่มต้น
+
+- 2D ใช้ตัววาดเลเยอร์เดิม
+- 3D สร้าง geometry จากพิกัด X/Y/Z จริงสำหรับชิ้นส่วนทั้ง 12 แบบ ใช้ perspective projection ลง Canvas พร้อม depth sorting ลากบนพรีวิวเพื่อ orbit กล้อง และใช้ scroll ซูม มีกริดพื้นในโลก 3D
+- เลเยอร์ในโหมด 3D มีตำแหน่ง Z, หมุนแกน X/Y เพิ่มจากการหมุน Z เดิม และความลึกการกระจายอนุภาค กล้องและโหมดบันทึกในโปรเจกต์
+- ระบบใช้เส้น/แท่งและ wire geometry จึงยังไม่มีพื้นผิวทึบ การชน เงาจริง หรือ volumetric simulation; พรีวิวคงจำกัด 30 FPS/960 px
+
 ## Export
 
 | รูปแบบ | ผลลัพธ์ |
@@ -19,12 +28,15 @@
 | PNG flipbook | ZIP มี atlas PNG, texture .meta, frame metadata JSON และโปรเจกต์ต้นฉบับ |
 | Shader Graph | ZIP เพิ่ม .shadergraph มี Time → Multiply → Flipbook → Sample Texture 2D เชื่อม PNG ผ่าน GUID |
 | VFX Graph | ZIP เพิ่ม .vfx จาก Unity FullLoop flipbook template ปรับ texture GUID, grid, frame rate, lifetime และ emission |
+| Unity 3D Mesh package | ใช้ได้เมื่อเลือก 3D: ZIP มี geometry animation JSON, C# Mesh component และ URP shader เก็บมิติจริงโดยไม่ bake กล้อง |
 
 เลือกขนาดต่อเฟรม 128–1024 px และ 16/36/64 เฟรม (atlas สูงสุด 8192px) ระยะเวลา 1–4 วินาที ใน ZIP มี README.md วิธีนำเข้าและ notices
 
 แตกไฟล์ทั้งชุดลงโฟลเดอร์ใหม่ภายใน Assets เพื่อรักษาการเชื่อม texture กับ .meta ใช้ Unity 6 + Shader Graph / VFX Graph 17.x และ pipeline ที่รองรับ Templates มาจาก Graphics/master จึงอาจต้องอัปเกรดหรือปรับตาม package version
 
-**ข้อจำกัด:** ส่งออกเป็น baked 2D flipbook บน quad ไม่ใช่การแปลงเลเยอร์เป็น procedural nodes แบบแก้ไขอิสระ และไม่ใช่ VFX 3D volumetric ยังไม่ได้ตรวจ import/compile ด้วย Unity Editor ใน workspace นี้ ไม่รับรองการนำเข้าใน Unity ทุกเวอร์ชัน
+**ข้อจำกัด:** PNG/Shader Graph/VFX Graph ยังคงเป็น baked 2D flipbook บน quad โดยโหมด 3D จะ bake มุมกล้องปัจจุบัน หากต้องการเก็บมิติจริงให้เลือก **Unity 3D Mesh package** ซึ่งเป็น Mesh animation ไม่ใช่ .vfx graph และไม่ใช่ volumetric simulation ยังไม่ได้ตรวจ import/compile ด้วย Unity Editor ใน workspace นี้
+
+นำเข้าแพ็กเกจ 3D ใน Unity URP: แตก ZIP ลง Assets → สร้าง Empty GameObject → เพิ่ม component VFXForge3D_… ที่ส่งออก → ใส่ไฟล์ .world3d.json ใน Animation Json → สร้าง Material ด้วย shader VFXForge/WorldLines_… แล้วใส่ Effect Material → Play ระบบสร้าง Mesh ต่อเฟรมและแคชไว้ในหน่วยความจำ จึงใช้หน่วยความจำเพิ่มตามจำนวนเฟรม/เลเยอร์ การเรืองแสงใน Unity ต้องใช้ Bloom ส่วน Alpha blend ของเลเยอร์จะประมาณเป็น Additive ในแพ็กเกจ 3D
 
 ## การพัฒนา
 
@@ -42,6 +54,14 @@ npm test
 ไฟล์หลัก: dist/index.html, style.css, app.js, engine.js, export.js; server.mjs สำหรับ localhost; test.mjs สำหรับตรวจโครงสร้าง export
 
 ## สถานะการตรวจสอบ
+
+### เพิ่ม 3D (2026-10-18)
+
+- เพิ่มตัวเลือก 2D/3D, กล้อง orbit, Z/tilt/depth, export ภาพจากกล้อง และแพ็กเกจ geometry 3D สำหรับ Unity URP
+- `node scene3d-test.mjs`: ตรวจ geometry ทั้ง 12 แบบมีความลึกจริง ค่า finite/deterministic, Z transform, camera projection, timing/visibility, JSON mesh frames, ชื่อ C# class/shader ตรงกัน และ ZIP 3D export
+- `npm test` ผ่านทั้ง export, performance, geometry 3D และ app smoke test (จำลอง DOM): เปิดแอป สลับ 2D/3D, เลือก renderer, จำกัด native export ให้โหมด 3D, preset คงโหมด และ migrate JSON เก่า
+- ติดตั้ง source เวอร์ชัน 1.1.0 บน Apache localhost แล้ว พร้อม cache version `3d1`
+- การทดสอบนี้เป็นระดับโค้ด ยังไม่ได้ยืนยัน UI ด้วยเบราว์เซอร์หรือ compile runtime ด้วย Unity Editor
 
 ### แก้อาการหน่วง (2026-10-18)
 

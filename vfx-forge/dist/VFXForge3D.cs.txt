@@ -1,0 +1,67 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+// World-space animation: no camera-facing flipbook or sprite sheet.
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+public class VFXForge3D : MonoBehaviour
+{
+    [Serializable] public class Segment { public Vector3 a, b; public float width, alpha; public string color; }
+    [Serializable] public class Frame { public Segment[] segments; }
+    [Serializable] public class AnimationData { public float duration; public Frame[] frames; }
+    public TextAsset animationJson;
+    public Material effectMaterial;
+    public float playbackSpeed = 1;
+    private AnimationData data;
+    private Mesh[] meshes;
+    private MeshFilter filter;
+    private Material ownedMaterial;
+    private float clock;
+
+    void Start()
+    {
+        filter = GetComponent<MeshFilter>();
+        if (!animationJson) { Debug.LogError("Assign the exported 3D animation JSON.", this); enabled = false; return; }
+        data = JsonUtility.FromJson<AnimationData>(animationJson.text);
+        if (data == null || data.frames == null || data.frames.Length == 0 || data.duration <= 0) { enabled = false; return; }
+        if (!effectMaterial) {
+            var shader = Shader.Find("VFXForge/WorldLines");
+            if (!shader) { Debug.LogError("Import the exported WorldLines shader and assign its material.", this); enabled = false; return; }
+            ownedMaterial = new Material(shader); effectMaterial = ownedMaterial;
+        }
+        GetComponent<MeshRenderer>().sharedMaterial = effectMaterial;
+        meshes = new Mesh[data.frames.Length];
+        // Build frames on demand to avoid a long startup stall.
+        ShowFrame(0);
+    }
+    void Update() {
+        clock = Mathf.Repeat(clock + Time.deltaTime * playbackSpeed, data.duration);
+        ShowFrame(Mathf.Min(data.frames.Length - 1, Mathf.FloorToInt(clock / data.duration * data.frames.Length)));
+    }
+    void ShowFrame(int index) {
+        if (!meshes[index]) meshes[index] = BuildMesh(data.frames[index]);
+        filter.sharedMesh = meshes[index];
+    }
+    static Mesh BuildMesh(Frame frame) {
+        var vertices = new List<Vector3>(); var colors = new List<Color>(); var indices = new List<int>();
+        foreach (var s in frame.segments) {
+            Vector3 direction = s.b - s.a;
+            if (direction.sqrMagnitude < 0.0000001f || s.alpha <= 0) continue;
+            direction.Normalize();
+            Vector3 right = Vector3.Cross(direction, Mathf.Abs(direction.y) > .9f ? Vector3.right : Vector3.up).normalized * s.width * .5f;
+            Vector3 up = Vector3.Cross(direction, right).normalized * s.width * .5f;
+            Color color; if (!ColorUtility.TryParseHtmlString(s.color, out color)) color = Color.white;
+            color.a = Mathf.Clamp01(s.alpha);
+            int start = vertices.Count;
+            foreach (var p in new[] { s.a, s.b }) foreach (var offset in new[] { right + up, -right + up, -right - up, right - up }) { vertices.Add(p + offset); colors.Add(color); }
+            for (int side = 0; side < 4; side++) { int next = (side + 1) % 4; indices.AddRange(new[] { start+side,start+next,start+side+4,start+next,start+next+4,start+side+4 }); }
+        }
+        var mesh = new Mesh { name = "VFX Forge world frame", indexFormat = IndexFormat.UInt32 };
+        mesh.SetVertices(vertices); mesh.SetColors(colors); mesh.SetTriangles(indices, 0); mesh.RecalculateBounds(); return mesh;
+    }
+    void OnDestroy() {
+        if (meshes != null) foreach (var mesh in meshes) if (mesh) Destroy(mesh);
+        if (ownedMaterial) Destroy(ownedMaterial);
+    }
+}

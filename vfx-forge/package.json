@@ -1,1 +1,1 @@
-{"name":"vfx-forge","version":"1.0.1","private":true,"type":"module","scripts":{"start":"node server.mjs","test":"node test.mjs && node performance-test.mjs"}}
+{"name":"vfx-forge","version":"1.1.0","private":true,"type":"module","scripts":{"start":"node server.mjs","test":"node test.mjs && node performance-test.mjs && node scene3d-test.mjs && node app-smoke-test.mjs"}}

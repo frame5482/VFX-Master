@@ -7,7 +7,7 @@ export const PARTS=[
  {type:'shield',name:'Arcane shield',th:'โล่เวท',icon:'⬡'}, {type:'vortex',name:'Vortex',th:'วังวน',icon:'◌'}
 ];
 export const THEMES=[['Arcane','#a48aff','#eee2ff'],['Flame','#ff713e','#ffe7a3'],['Glacier','#67cfff','#e2fdff'],['Nature','#79efb5','#e4ffbe'],['Sakura','#ff8bbf','#ffe1ed'],['Solar','#f5ce74','#fff7d8']];
-export function layer(type,extra={}){const p=PARTS.find(p=>p.type===type);return {id:crypto.randomUUID(),type,name:p.name,color:'#ae8dff',accent:'#f4e5ff',size:1,opacity:1,rotation:0,x:0,y:0,speed:1,density:32,seed:42,start:0,length:2,visible:true,blend:'lighter',...extra};}
+export function layer(type,extra={}){const p=PARTS.find(p=>p.type===type);return {id:crypto.randomUUID(),type,name:p.name,color:'#ae8dff',accent:'#f4e5ff',size:1,opacity:1,rotation:0,x:0,y:0,z:0,tiltX:0,tiltY:0,depth:1,speed:1,density:32,seed:42,start:0,length:2,visible:true,blend:'lighter',...extra};}
 export function presets(){return [
  {name:'Arcane awakening',tag:'MAGIC · 4 LAYERS',layers:[layer('rune',{name:'Ancient sigil',size:1.08,y:.24}),layer('beam',{name:'Ascension',size:.82,y:-.08,opacity:.75}),layer('sparks',{name:'Stardust',density:48,size:1.18}),layer('ring',{name:'Ground pulse',y:.24,size:1.12,opacity:.8})]},
  {name:'Crimson slash',tag:'COMBAT · 3 LAYERS',layers:[layer('slash',{rotation:-25}),layer('slash',{rotation:35,size:.75,opacity:.65,start:.15,length:1.85}),layer('sparks',{density:35,size:.9})],theme:1},

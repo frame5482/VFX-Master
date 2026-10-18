@@ -20,3 +20,5 @@ npm start
 อัปเดต 2026-10-18: สร้างตัวแก้ไข VFX แบบเลเยอร์ พร้อม PNG/flipbook/Shader Graph/VFX Graph export ตรวจ syntax, โครงสร้าง Graph/ZIP และ HTTP 200 แล้ว ดูข้อจำกัดเรื่อง Unity import และ browser QA ใน README ของแอป
 
 แก้อาการหน่วง: เพิ่ม glow/grid cache, จำกัดพรีวิว 30 FPS/960 px, ลด DOM/layout ในลูป และหยุดวาดเมื่อ Pause/ซ่อนแท็บ โดยคงคุณภาพ Export เดิม รายละเอียดและผลทดสอบใน README ของแอป
+
+เพิ่ม 2D/3D: geometry พิกัด X/Y/Z, กล้อง orbit, ปรับ Z/tilt/depth และ Export Unity 3D Mesh package (URP) ส่วน PNG/Graph จะ bake มุมกล้องปัจจุบัน ดูวิธีใช้และข้อจำกัดใน README ของแอป
