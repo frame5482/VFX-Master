@@ -1,0 +1,16 @@
+Unity Shader Graph and VFX Graph templates
+Copyright Unity Technologies. All rights reserved.
+Source: https://github.com/Unity-Technologies/Graphics
+Branch: master (downloaded 2026-10-18; package generation targets Unity 6 / 17.x).
+Files:
+Packages/com.unity.shadergraph/GraphTemplates/Cross Pipeline/Unlit Simple.shadergraph
+Tests/SRPTests/Packages/com.unity.testing.visualeffectgraph/Scenes/025_Flipbook/025_FlipbookPlayerFullLoop.vfx
+
+Licensed under the Unity Companion License for Unity-dependent projects:
+https://unity.com/legal/licenses/unity-companion-license
+The template assets and derivatives may be used subject to that license; this is not a grant of rights beyond that license.
+Full license is bundled in UNITY-COMPANION-LICENSE.txt in this website distribution.
+
+Interface and procedural effect renderer: VFX Forge project.
+Workflow inspiration: Night Forge VFX Lab, https://vfx.gamemellow.dev/
+No artwork, source code, presets or proprietary assets were copied from that reference website.
